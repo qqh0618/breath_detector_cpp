@@ -76,15 +76,18 @@ Mat breath_detector::ffreq(int n, double d) {
 }
 
 int breath_detector::get_frequency(vector<float> &breath_changes,bool graph){
-    vector<float> one_chunk = breath_changes;
-    float one_chunk_mean = std::accumulate(one_chunk.begin(),one_chunk.end(),0)/one_chunk.size();
+    vector<float> one_chunk = breath_changes; //得到呼吸变化
+    float one_chunk_mean = std::accumulate(one_chunk.begin(),one_chunk.end(),0)/one_chunk.size();//求呼吸变化平均值
     Mat chunk_frame(one_chunk);
     cout<<"test1"<<endl;
-    Mat mean_frame(chunk_frame.rows,chunk_frame.cols,CV_32FC1,Scalar(-one_chunk_mean));
+    Mat mean_frame(chunk_frame.rows,chunk_frame.cols,CV_32FC1,Scalar(-one_chunk_mean));//得到一个一通道，值为-one_chuk_mean的Mat
+    int aa = mean_frame.type();
     cout<<"test2"<<endl;
-    cv::add(chunk_frame,mean_frame,mean_frame);
-    cv::dft(mean_frame,mean_frame,DFT_COMPLEX_OUTPUT);
-    Mat ffreq_frame = ffreq(one_chunk.size(),1.0/FPS);
+    cv::add(chunk_frame,mean_frame,mean_frame); //得到一个减去平均值之后的Mat of mean_frame
+    int bb = mean_frame.type();
+    cv::dft(mean_frame,mean_frame,DFT_COMPLEX_OUTPUT);//离散傅里叶变换,这里mean_frame变成了2维的图分别为实部和虚部
+    int cc = mean_frame.type();
+    Mat ffreq_frame = ffreq(one_chunk.size(),1.0/FPS);//获得频率图
     cout<<"test3"<<endl;
     Mat mask_frame;
     compare(ffreq_frame,0.28,mask_frame,CMP_GE);//比较大小，大于0.28的输出为255，否则输出为0,留下这个掩膜
@@ -92,12 +95,13 @@ int breath_detector::get_frequency(vector<float> &breath_changes,bool graph){
     Mat abs_dft(mean_frame);//计算傅里叶变换后 复数的模
     cout<<"test4"<<endl;
 //    Mat mask_dft;//存放掩码后的数据
+
     bitwise_and(abs_dft,mask_frame,abs_dft);//abs_dft掩码后的数据
     cout<<"test5"<<endl;
     //找掩码后最大值的位置
 //    int maxVaule = *max_element(((vector<double>)abs_dft).begin(),((vector<double>)abs_dft).end());
     int maxPosition = max_element(((vector<double>)abs_dft.reshape(1,1)).begin(),((vector<double>)abs_dft.reshape(1,1)).end())-((vector<double>)abs_dft.reshape(1,1)).begin();
-    cout<<"test5"<<endl;
+    cout<<"test9"<<endl;
     return ((vector<float>)ffreq_frame.reshape(1,1))[maxPosition];
 
 
