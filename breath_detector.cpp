@@ -75,6 +75,16 @@ Mat breath_detector::ffreq(int n, double d) {
     return vec_frame;
 }
 
+Mat breath_detector::count_abs_dft(Mat dft_frame) {
+//    Mat abs_def_frame = cv::abs(dft_frame);
+    pow(dft_frame,2,dft_frame);
+    vector<Mat> channels;
+    split(dft_frame,channels);
+    add(channels[0],channels[1],channels[0]);
+    pow(channels[0],0.5,channels[0]);
+    return channels[0];
+}
+
 int breath_detector::get_frequency(vector<float> &breath_changes,bool graph){
     vector<float> one_chunk = breath_changes; //得到呼吸变化
     float one_chunk_mean = std::accumulate(one_chunk.begin(),one_chunk.end(),0)/one_chunk.size();//求呼吸变化平均值
@@ -92,7 +102,7 @@ int breath_detector::get_frequency(vector<float> &breath_changes,bool graph){
     Mat mask_frame;
     compare(ffreq_frame,0.28,mask_frame,CMP_GE);//比较大小，大于0.28的输出为255，否则输出为0,留下这个掩膜
     //掩码用按位与，无论正负，非0数按位与后均为正数
-    Mat abs_dft(mean_frame);//计算傅里叶变换后 复数的模
+    Mat abs_dft=count_abs_dft(mean_frame);//计算傅里叶变换后 复数的模
     cout<<"test4"<<endl;
 //    Mat mask_dft;//存放掩码后的数据
 

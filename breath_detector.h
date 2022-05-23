@@ -27,7 +27,7 @@ private:
     vector<vector<int>> Mat2Array(Mat image);
     CascadeClassifier haarClassifier;
     Mat ffreq(int n,double d=1.0 );
-    Mat abs_dft(Mat dft_frame);
+    Mat count_abs_dft(Mat dft_frame);
 };
 
 #endif //BREATE_DETCT_BREATH_DETECTOR_H
